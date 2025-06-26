@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const shortid = require('shortid');
 const Url = require('../models/Url');
-const logger = require('../middleware/logger');
+const Log = require('../utils/logger');
 
 // @route    POST /api/shorturls
 // @desc     Create new short URL
@@ -12,7 +12,7 @@ router.post('/shorturls', async (req, res) => {
   // Validate URL format
   const urlRegex = /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i;
   if (!urlRegex.test(url)) {
-    logger.error(`Invalid URL format: ${url}`);
+    Log("backend", "error", "handler", `Invalid URL format: ${url}`);
     return res.status(400).json({ error: 'Invalid URL format' });
   }
 
@@ -20,7 +20,7 @@ router.post('/shorturls', async (req, res) => {
   if (shortcode) {
     const existingUrl = await Url.findOne({ shortCode: shortcode });
     if (existingUrl) {
-      logger.error(`Custom shortcode already in use: ${shortcode}`);
+      Log("backend", "error", "handler", `Custom shortcode already in use: ${shortcode}`);
       return res.status(409).json({ error: 'Custom shortcode already in use' });
     }
   }
@@ -44,13 +44,13 @@ router.post('/shorturls', async (req, res) => {
     });
 
     await newUrl.save();
-    logger.info(`Short URL created: ${newShortCode} for ${url}`);
+    Log("backend", "info", "handler", `Short URL created: ${newShortCode} for ${url}`);
     res.status(201).json({
       shortLink: `${req.protocol}://${req.get('host')}/${newShortCode}`,
       expiry: expiresAt.toISOString(),
     });
   } catch (err) {
-    logger.error(`Server error during URL creation: ${err.message}`);
+    Log("backend", "error", "handler", `Server error during URL creation: ${err.message}`);
     res.status(500).send('Server error');
   }
 });
@@ -63,7 +63,7 @@ router.get('/:shortCode', async (req, res) => {
 
     if (url) {
       if (url.expiresAt && url.expiresAt < new Date()) {
-        logger.warn(`Expired shortcode accessed: ${req.params.shortCode}`);
+        Log("backend", "warn", "handler", `Expired shortcode accessed: ${req.params.shortCode}`);
         return res.status(404).json('Short URL has expired');
       }
 
@@ -74,14 +74,14 @@ router.get('/:shortCode', async (req, res) => {
         ip: req.ip,
       });
       await url.save();
-      logger.info(`Redirecting ${req.params.shortCode} to ${url.longUrl}`);
+      Log("backend", "info", "handler", `Redirecting ${req.params.shortCode} to ${url.longUrl}`);
       return res.redirect(url.longUrl);
     } else {
-      logger.warn(`Shortcode not found: ${req.params.shortCode}`);
+      Log("backend", "warn", "handler", `Shortcode not found: ${req.params.shortCode}`);
       return res.status(404).json('No short URL found');
     }
   } catch (err) {
-    logger.error(`Server error during redirection: ${err.message}`);
+    Log("backend", "error", "handler", `Server error during redirection: ${err.message}`);
     res.status(500).send('Server error');
   }
 });
@@ -93,7 +93,7 @@ router.get('/shorturls/:shortCode', async (req, res) => {
     const url = await Url.findOne({ shortCode: req.params.shortCode });
 
     if (url) {
-      logger.info(`Retrieved statistics for shortcode: ${req.params.shortCode}`);
+      Log("backend", "info", "handler", `Retrieved statistics for shortcode: ${req.params.shortCode}`);
       res.json({
         totalClicks: url.clicks.length,
         originalUrl: url.longUrl,
@@ -106,11 +106,11 @@ router.get('/shorturls/:shortCode', async (req, res) => {
         })),
       });
     } else {
-      logger.warn(`Statistics requested for non-existent shortcode: ${req.params.shortCode}`);
+      Log("backend", "warn", "handler", `Statistics requested for non-existent shortcode: ${req.params.shortCode}`);
       return res.status(404).json('No short URL found for statistics');
     }
   } catch (err) {
-    logger.error(`Server error during statistics retrieval: ${err.message}`);
+    Log("backend", "error", "handler", `Server error during statistics retrieval: ${err.message}`);
     res.status(500).send('Server error');
   }
 });

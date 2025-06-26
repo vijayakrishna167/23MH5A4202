@@ -5,6 +5,7 @@ const connectDB = require('./config/db');
 const logger = require('./middleware/logger');
 const { requestLogger } = require('./middleware/logger');
 const urlRoutes = require('./routes/url');
+const { errorLogger } = require('./middleware/logger');
 
 const app = express();
 
@@ -19,6 +20,9 @@ app.use(requestLogger);
 
 // Define Routes
 app.use('/', urlRoutes); // Handles redirection for shortcodes and API routes
+
+// Error Logging Middleware
+app.use(errorLogger);
 
 const PORT = process.env.PORT || 5000;
 

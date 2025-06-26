@@ -12,3 +12,7 @@
 {"level":"info","message":"Short URL created: fb for https://www.facebook.com","service":"url-shortener-microservice"}
 {"level":"info","message":{"ip":"::1","method":"GET","timestamp":"2025-06-26T06:11:01.383Z","url":"/fb"},"service":"url-shortener-microservice"}
 {"level":"info","message":"Redirecting fb to https://www.facebook.com","service":"url-shortener-microservice"}
+{"level":"info","message":"Server running on port 5000","service":"url-shortener-microservice"}
+{"level":"info","message":"MongoDB Connected...","service":"url-shortener-microservice"}
+{"level":"info","message":{"ip":"::1","method":"POST","timestamp":"2025-06-26T07:30:47.765Z","url":"/shorturls"},"service":"url-shortener-microservice"}
+{"level":"info","message":{"ip":"::1","method":"POST","timestamp":"2025-06-26T07:31:05.485Z","url":"/shorturls"},"service":"url-shortener-microservice"}

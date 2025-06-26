@@ -1,4 +1,5 @@
 const winston = require('winston');
+const Log = require('../utils/logger'); // Import the new Log function
 
 // Configure Winston Logger
 const logger = winston.createLogger({
@@ -21,5 +22,20 @@ const requestLogger = (req, res, next) => {
   next();
 };
 
+// Middleware for centralized error logging
+const errorLogger = (err, req, res, next) => {
+  Log("backend", "error", "middleware", err.message);
+  logger.error({
+    method: req.method,
+    url: req.url,
+    ip: req.ip,
+    timestamp: new Date().toISOString(),
+    error: err.message,
+    stack: err.stack,
+  });
+  next(err);
+};
+
 module.exports = logger;
-module.exports.requestLogger = requestLogger; 
+module.exports.requestLogger = requestLogger;
+module.exports.errorLogger = errorLogger; // Export the errorLogger 
